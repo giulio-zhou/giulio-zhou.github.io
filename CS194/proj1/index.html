@@ -1,0 +1,192 @@
+<html>
+    <div style="font-size:24; font-weight:bold">CS 194-26: Image Manipulation and Computational Photography</div>
+    <div style="font-size:18; font-style:italic">Project One - Images of the Russian Empire: Colorizing the Prokudin-Gorskii photo collection</div>
+    <div style="font-size:18; padding-bottom: 0.6cm">Giulio Zhou</div>
+
+    <div style="padding-bottom: 2mm"><span style="font-weight:bold">Objective:</span> Given three black-and-white photographs taken through red, green and blue glass plates, reconstruct the original color photo by aligning the black-and-white images.</div>
+
+    <div><span style="font-weight:bold">Naive method:</span> First, I implemented a naive image alignment method using Normalized Cross Correlation as the distance metric. Distance computation is only performed using the middle 80% of the image to minimize interference from damaged or inconsistent edges. This procedure performs a brute force search within a [-15 15] window of the origin (top left corner of the blue image) and aligns the red and green glass plate images at the point of minimal distance to the blue image. While this was easily accomplished on small jpg images, which tended to be on the order of 400-500 pixels wide, this was entirely unsuitable for the much larger tif images.</div>
+    <table>
+      <tr>
+        <th>
+            <img src="final_results/cathedral.jpg"  width="300"><br>
+            Cathedral <br>
+            R: [12 3], G: [5 2]
+        </th>
+
+        <th>
+            <img src="final_results/monastery.jpg"  width="300"><br>
+            Monastery <br>
+            R: [3 2], G: [-3 2]
+        </th>
+
+        <th>
+            <img src="final_results/nativity.jpg"  width="300"><br>
+            Nativity <br>
+            R: [7 0], G: [3 1]
+        </th>
+      <tr>
+        <th>
+            <img src="final_results/settlers.jpg"  width="300"><br>
+            Settlers <br>
+            R: [15 -1], G: [7 0]
+        </th>
+
+        <th>
+            <img src="final_results/tobolsk.jpg"  width="300"><br>
+            Tobolsk <br>
+            R: [6 3], G: [3 3]
+        </th>
+    </table>
+
+    <div><span style="font-weight:bold">Advanced Alignment (Image Pyramid):</span> To align tif images, I had no choice but to use more advanced alignment techniques. To save on computation, I used image pyramids to significantly decrease the search space. The technique works by repeatedly downsampling the target and source images until a pre-defined threshold(my algorithm treated any image with dimensions below 500 pixels as a base case). Image alignment is then performed in a [-15 15] window at the lowest level and within a [-2 2] window at all higher levels. </div>
+    <table>
+      <tr>
+        <th>
+            <img src="final_results/bridge_final.jpg"  width="300"><br>
+            Bridge <br>
+            R: [68 5], G: [12 -10]
+        </th>
+        
+        <th>
+            <img src="final_results/emir_final.jpg"  width="300"><br>
+            Emir <br>
+            R: [104 56], G: [49 24]
+        </th>
+        
+        <th>
+            <img src="final_results/harvesters_final.jpg"  width="300"><br>
+            Harvesters <br>
+            R: [124 13], G: [60 17]
+        </th>
+
+        <th>
+            <img src="final_results/icon_final.jpg"  width="300"><br>
+            Icon <br>
+            R: [89 23], G: [41 17]
+        </th>
+      </tr>
+
+      <tr>
+        <th>
+            <img src="final_results/lady_final.jpg"  width="300"><br>
+            Lady <br>
+            R: [117 11], G: [54 9]
+        </th>
+
+        <th>
+            <img src="final_results/melons_final.jpg"  width="300"><br>
+            Melons <br>
+            R: [134 14], G: [82 11] <br>
+            <div style="text-align:left">Upon closer inspection, I noticed that the image taken through the red filter looked much brighter than those taken through the green and blue filters, which had much more similar pixel intensities. While the blue and green images aligned fairly well, the unaligned red channel creates a noticeable ghosting effect.</div>
+        </th>
+
+        <th>
+            <img src="final_results/onion_church_final.jpg"  width="300"><br>
+            Onion Church <br>
+            R: [108 36], G: [51 26]
+        </th>
+
+        <th>
+            <img src="final_results/self_portrait_final.jpg"  width="300"><br>
+            Self Portrait <br>
+            R: [134 34], G: [79 29]
+            <div style="text-align:left">Similar to the melons photo, the green and blue sections aligned fairly consistently, but the red filtered photo was different enough to create alignment issues.</div>
+        </th>
+      </tr>
+
+      <tr>
+        <th>
+            <img src="final_results/three_generations_final.jpg"  width="300"><br>
+            Three Generations <br>
+            R: [112 11], G: [53 14]
+        </th>
+
+        <th>
+            <img src="final_results/train_final.jpg"  width="300"><br>
+            Train <br>
+            R: [87 32], G: [42 6]
+        </th>
+
+        <th>
+            <img src="final_results/turkman_final.jpg"  width="300"><br>
+            Turkman <br>
+            R: [116 28], G: [56 21]
+        </th>
+
+        <th>
+            <img src="final_results/workshop_final.jpg"  width="300"><br>
+            Workshop <br>
+            R: [105 -12], G: [53 0]
+        </th>
+      </tr>
+
+      <tr>
+        <th>
+            <img src="final_results/village_final.jpg"  width="300"><br>
+            Village <br>
+            R: [134 22], G: [65 12]
+        </th>
+      </tr>
+    </table>
+    
+    Here are some additional photos that I chose myself from the Library of Congress archives.
+    <table>
+      <tr>
+        <th>
+            <img src="final_results/icon_last_judgement_final.jpg" width="300"><br>
+            Icon of the Last Judgement. <br>
+            R: [113 20], G: [49 14]
+        </th>
+
+        <th>
+            <img src="final_results/steamship_crew_final.jpg"  width="300"><br>
+            Crew of the steamship "Sheksna" of the M.P.S. <br>
+            R: [56 30], G: [21 18]
+        </th>
+
+        <th>
+            <img src="final_results/church_doors_final.jpg"  width="300"><br>
+            Old gates in the Church of the Assumption of the Mother of God.<br>
+            R: [92 30], G: [18 18]
+        </th>
+
+        <th>
+            <img src="final_results/iconostasis_final.jpg"  width="300"><br>
+            Iconostasis in the Church of the Transfiguration.<br>
+            R: [94 -26], G: [34 -5]
+        </th>
+      </tr>
+    </table>
+
+    <div><span style="font-weight:bold">Automatic Cropping:</span> Due to shifting of the red and green images, we end up with many sharp vertical lines around the borders. Using vertical and horiztonal sobel edge detectors and a probabilistic Hough transform, we can detect and automatically crop these borders to improve the image.</div>
+    <img src="final_results/hough_transform.png">
+    <table>
+      <tr>
+        <th>
+          <div style="font-weight:bold">Before:</div>
+          <img src="final_results/nativity.jpg">
+        </th>
+
+        <th>
+          <div style="font-weight:bold">After:</div>
+          <img src="final_results/nativity_cropped.jpg">
+        </th>
+      </tr>
+    </table>
+
+    <div><span style="font-weight:bold">Edge Detection:</span> Certain images such as the Emir were almost aligned using normalized cross correlation. Using sobel filter edge detection as a more advanced set of features, I was able to get noticeably better fine-tuned alignment. 
+    <table>
+      <tr>
+        <th>
+          <div style="font-weight:bold">Before:</div>
+          <img src="final_results/emir_final.jpg" width="500">
+        </th>
+
+        <th>
+          <div style="font-weight:bold">After:</div>
+          <img src="final_results/emir_edges_final.jpg" width="500">
+        </th>
+      </tr>
+    </table>
+</html>

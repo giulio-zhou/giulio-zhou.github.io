@@ -1,0 +1,538 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+  </head>
+    <h1>CS 194-26: Image Manipulation and Computational Photography</h1>
+    <h2>Final Project - Gradient Domain Blending and Image Quilting</h2>
+    <h2>Giulio Zhou</h2>
+
+    <h1>Gradient Domain Blending</h1>
+    <h3>Background</h3>
+    First, let's begin by exploring some of the motivations for gradient domain blending. Recall the blending using Gaussian and Laplacian stacks that we
+    did in project 3. While this was quite useful for blending the seams, an observer would still notice the difference in color if the two images were
+    very different to begin with. As a solution, we operate on the principle that humans are more sensitive to gradients than absolute color intensities.
+    Introducing Poisson blending! Given a source and target image, we will optimize a couple of key criteria.
+      <ol>
+          <li> <b>Source gradients:</b> To ensure that the result maintains the appearance of the source image, we include in our least squares optimization
+               the term <code>((s_i - s_j) - (x_i - x_j))</code>.</li>
+          <li> <b>Target border gradients:</b> To seamlessly blend the edges of the source image into the target image, we also include a cross-border term
+               of the form <code>((x_i - t_j) - (s_i - t_j))</code>. </li>
+      </ol>
+    <h3>Part One: Toy Problem</h3>
+    To start, I tested the correctness of the method by inputting its dx/dy gradients into a matrix and optimizing using least squares. If the method was
+    implemented correctly, the result should be exactly the same as the source image. By including the pixel values of the top-left corner, the rest of
+    the intensities fall into place. As we can see, the following two images look more or less the same (minus a small error tolerance).
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/toy_problem.png' width=300><br>
+          <center>Toy Problem</center>
+        </td>
+
+        <td>
+          <img src='images/toy_result.png' width=300><br>
+          <center>Toy Problem Output</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+
+    <h3>Part Two: Poisson Blending</h3>
+    Now that we've verified the correctness of the method, we can move on to the fun stuff! Here, we add in the vertical and leftwards gradients as well
+    (implemented fast in numpy using <code>np.roll</code>) into our source matrix and copy in the target gradients into our destination vector <code>b</code>.
+    Optimizing with respect to the pixel values for each color channel individually, we obtain some pretty great results!
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/airplane.jpg' width=250><br>
+          <center>A Fighter Jet!</center>
+        </td>
+
+        <td>
+          <img src='images/berkeley.jpg' width=250><br>
+          <center>Berkeley</center>
+        </td>
+
+        <td>
+          <img src='images/berkeley_plane_paste.jpg' width=250><br>
+          <center>Copy-Paste Attempt</center>
+        </td>
+
+        <td>
+          <img src='images/plane_berkeley_norm.jpg' width=250><br>
+          <center>It's a plane over Berkeley!</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+
+    <center>
+    <table>
+      <tr>
+        <td>
+          <img src='images/trump.jpg' width=300><br>
+          <center>Donald Trump</center>
+        </td>
+
+        <td>
+          <img src='images/Shrek.jpg' width=300><br>
+          <center>Shrek</center>
+        </td>
+
+        <td>
+          <img src='images/trump_shrek.jpg' width=300><br>
+          <center>Trump-Shrek</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+   
+    <h3>Part Three: Mixed Poisson Blending</h3>
+    As we can see, our results are quite good. So why do we care about this mixed Poisson technique? Consider the case where we want to blend this Keep
+    Calm poster onto the subway surface shown below. Preferably, we'd like to be able to see the background as well. To do so, we try something a little
+    different from Part Two. Instead of optimizing the least squares gradients with respect to just the source image, we instead set it to be equal to the
+    maximum of the target and source gradients by the equation <code>((x_i - t_j) - max{(s_i - s_j), (t_i - t_j)})</code>.
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/keep_calm.jpg' width=100><br>
+          <center>Keep Calm</center>
+        </td>
+
+        <td>
+          <img src='images/subway.jpg' width=300><br>
+          <center>Subway</center>
+        </td>
+
+        <td>
+          <img src='images/calm_subway_normal.jpg' width=300><br>
+          <center>Poisson blending</center>
+        </td>
+
+        <td>
+          <img src='images/calm_subway.jpg' width=300><br>
+          <center>Mixed Gradient blending</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+    The differences are pretty clear and really cool to see!
+
+    <h3>Failure Case</h3>
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/penguin.jpg' width=100><br>
+          <center>Penguin</center>
+        </td>
+
+        <td>
+          <img src='images/house.jpg' width=250><br>
+          <center>Suburban House</center>
+        </td>
+
+        <td>
+          <img src='images/penguin_house.jpg' width=250><br>
+          <center>Penguin House Poisson Blending</center>
+        </td>
+
+        <td>
+          <img src='images/penguin_house_mixed.jpg' width=250><br>
+          <center>Penguin House Mixed Gradient</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+    Notice how the color of the original background makes the penguin extremely dark! Zooming in, we can see that mixed gradients does a slightly better
+    job at preserving the grass gradients but still leads to a rather dark penguin. While gradient domain blending produces fairly good results most of
+    the time, it's clear that blending across wildly differing colors is not it's strong point.
+
+    <h3>Comparison to Frequency Domain Blending</h3>
+    I tried out our new tools on the apple orange example from the frequency domain blending assignment and found some interesting results.
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/apple.jpeg' width=300><br>
+          <center>Apple</center>
+        </td>
+
+        <td>
+          <img src='images/orange.jpeg' width=300><br>
+          <center>Orange</center>
+        </td>
+
+        <td>
+          <img src='images/apple_orange_laplace.jpg' width=300><br>
+          <center>Laplace Blending</center>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src='images/apple_orange_poisson.jpg' width=300><br>
+          <center>Poisson Blending</center>
+        </td>
+
+        <td>
+          <img src='images/apple_orange_poisson_mixed.jpg' width=300><br>
+          <center>Mixed Gradient Blending</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+    While mixed gradient blending produced a noticeable ghosting effect, the results from Poisson blending were not half bad! However, we can see how
+    the orange turned the apple somewhat more orange and there is a small seam still visible at the bottom. Based on these observations, it seems that
+    Laplace blending tends to do much better when the colors of the source and target images match and when we want to preserve the absolute intensities
+    of the images. On the other hand, gradient domain blending allows us to perform a much wider array of seamless blends.
+
+    <h2>Bells and Whistles</h2>
+    <h3>Black-and-White Color Remapping</h3>
+    Take a look at the above color-blindness test image. The color version looks cool and all, but the grayscale version has a very prominent issue. We
+    can't actually see the 35! Using the gradient optimization techniques from earlier, we can perform a remapping of the grayscale intensities that
+    increases the contrast of the image while preserving the overall intensities. Mixed gradients help us out a lot here. First, let's examine the image
+    in HSV space. From the results below, it looks like the saturation and value channels are pretty good by themselves. However, it's clearly insufficient
+    to just take the saturation or value channels every time.
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/colorblind.jpg' width=300><br>
+          <center>Colorblind 35 Test</center>
+        </td>
+
+        <td>
+          <img src='images/colorblind_35_gray.jpg' width=300><br>
+          <center>Colorblind 35 Gray</center>
+        </td>
+
+        <td>
+          <img src='images/colorblind_35.jpg' width=300><br>
+          <center>Colorblind 35 Remapped</center>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src='images/colorblind_73.jpg' width=300><br>
+          <center>Colorblind 73 Test</center>
+        </td>
+
+        <td>
+          <img src='images/colorblind_73_gray.jpg' width=300><br>
+          <center>Colorblind 73 Gray</center>
+        </td>
+
+        <td>
+          <img src='images/colorblind_73_remap.jpg' width=300><br>
+          <center>Colorblind 73 Remapped</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+
+
+    As such, we'll try something a little different. Instead of just taking the channel as is, we will approach this as a mixed gradients problem of blending
+    the saturation channel into the value channel.
+    <h3>Texture Smoothing</h3>
+    Playing with gradients gives us a lot of interesting options, allowing us to manipulate high level image features by working with optimizing over
+    relatively lower level features. In this application, I manipulated the image gradients to produce a smoothed out version of the input image. Given
+    this image of Paul Hilfinger, I ran a canny edge detector and only kept gradients at pixels where an edge was detected. The results are quite
+    interesting to behold: it looks like a watercolor painting! Overlaying the detected edges onto the image allows us to really see where the gradients
+    were applied. Although there was some bleeding of colors, it's clear that these were due to the edge detector output, which can easily be manipulated
+    to get the desired output.
+
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/hilfinger.jpg' width=300><br>
+          <center>Paul Hilfinger</center>
+        </td>
+
+        <td>
+          <img src='images/hilfinger_smooth.jpg' width=300><br>
+          <center>Watercolor Hilfinger</center>
+        </td>
+
+        <td>
+          <img src='images/hilfinger_edges.jpg' width=300><br>
+          <center>Hilfinger with edges</center>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src='images/obama_portrait.jpg' width=300><br>
+          <center>Barack Obama</center>
+        </td>
+
+        <td>
+          <img src='images/obama_smooth.jpg' width=300><br>
+          <center>Watercolor Obama</center>
+        </td>
+
+        <td>
+          <img src='images/obama_edges.jpg' width=300><br>
+          <center>Obama with edges</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+   
+    
+    <h1>Image Quilting</h1>
+    <h2>Texture Synthesis</h2>
+    <h3>Random Texture Synthesis</h3>
+    First, I played around with random quilting, where I would generate textures by randomly sampling from the set of available blocks. As we can see below,
+    the results leave very much to be desired. Although it looks quite terrible, this will serve as a benchmark for comparison in the methods we will explore.
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/image_quilting/wood_mesh.jpg' width=192><br>
+          <center>Wood Mesh Texture</center>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/mesh_random.jpg' width=500><br>
+          <center>Random Texture Synthesis</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+
+    <h3>SSD-based Overlap Texture Synthesis</h3>
+    As an improvement to the first method, I implemented a method which overlaps blocks according to a sum of squared distances metric. The difference is
+    noticeable, but the quality is still poor. The seams between the blocks are clearly visible and the sharp color discontinuities are rather terrible. 
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/image_quilting/wood_mesh.jpg' width=192><br>
+          <center>Wood Mesh Texture</center>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/mesh_ssd.jpg' width=500><br>
+          <center>SSD-based Texture Synthesis</center>
+        </td>
+      </tr>
+    </table>
+    </center>
+
+    <h3>Min-Cut Texture Synthesis</h3>
+    Finally, I implemented min-cut texture synthesis to address the issues faced in the previous naive methods of texture synthesis. The method used here
+    is the one discussed in the Image Quilting paper (courtesy of Professor Efros). The algorithm proceeds by generating the texture in raster scan order,
+    using block overlaps of 1/6 the block size. Keeping only the blocks that satisfy some pre-specified overlap constraint s, we compute the minimum cost
+    seam with some randomly chosen block and paste this is into the texture. As we see below, this makes a tremendous difference in the quality of our
+    output textures.
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/image_quilting/wood_mesh.jpg' width=192><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/mesh_min_cut.jpg' width=500><br>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src='images/image_quilting/bricks.jpg' width=192><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/brick_min_cut.jpg' width=500><br>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src='images/image_quilting/rocks.jpg' width=307><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/rock_min_cut.jpg' width=500><br>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src='images/image_quilting/text.jpg' width=108><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/text_min_cut.jpg' width=500><br>
+        </td>
+      </tr>
+    </table>
+    </center>
+
+    <h2>Bells and Whistles</h2>
+    <h3>Texture Transfer and Iterative Refinement</h3>
+    Now, some more fun with texture synthesis! Another one of the applications described in Professor Efros' paper, texture transfer involves using
+    pre-specificed textures to paint images by introducing an extra cost term. Previously in the texture synthesis, we worked on minimizing the block
+    overlap error. Here, we define correspondence error, a new term consisting of the squared difference between the Gaussian blurred intensities of
+    the proposed texture block and the corresponding block in the target image. 
+    <pre>
+    <code>
+      error = alpha * overlap_error + (1-alpha) * correspondence_error;
+    </code>
+    </pre>
+    Here are some of the results!
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/image_quilting/picasso.jpg' width=200><br>
+          <center>Picasso</center>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/feynman.jpg' width=300><br>
+          <center>Richard Feynman</center>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/feynman_picasso_iter_3.jpg' width=300><br>
+          <center>Feynman as a Picasso painting</center>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src='images/image_quilting/toast.jpg' width=200><br>
+          <center>Toast</center>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/hilfinger.jpg' width=300><br>
+          <center>Professor Hilfinger</center>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/hilfinger_toast_iter_3.jpg' width=300><br>
+          <center>Startup idea: HilfToaster &trade;</center>
+        </td>
+    </tr>
+    </table>
+    </center>
+    The results are pretty decent, and were obtained by iterating upon the textures we've already synthesized. Defining a new term,
+    existing_error, as the squared difference between the proposed texture block and the previously synthesized texture, we iterate with a block size reduced
+    by one-third each time and a value of alpha given by 
+    <pre>
+    <code>
+      alpha = 0.8 * (i - 1)/(num_iter - 1) + 0.1
+    </code>
+    </pre>
+    The new error function is given by
+    <pre>
+    <code>
+      error = alpha * (overlap_error + existing_error) + (1-alpha) * correspondence_error;
+    </code>
+    </pre>
+    The progression of texture mapping results is shown below.
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src='images/image_quilting/feynman_picasso_iter_1.jpg' width=300><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/feynman_picasso_iter_2.jpg' width=300><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/feynman_picasso_iter_3.jpg' width=300><br>
+        </td>
+      </tr>
+
+     <tr>
+        <td>
+          <img src='images/image_quilting/hilfinger_toast_iter_1.jpg' width=300><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/hilfinger_toast_iter_2.jpg' width=300><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/hilfinger_toast_iter_3.jpg' width=300><br>
+        </td>
+    </tr>
+
+    </table>
+    </center>
+    <h3>Texture Synthesis for Image Hole Filling</h3>
+    As an experiment, I implemented a naive hole filling algorithm using some of the texture synthesis techniques from earlier. The method takes in an
+    image and the mask to isolate the pixels to be removed. As a rudimentary priority function, I convolve the entire image with a <code>block_size,
+    block_size</code> sized array of ones to determine the number of neighbors that each point has, then randomly select one above a certain threshold.
+    Once I've selected the point, I treat this point as the center then get the neighboring pixels. This is matched using an SSD distance metric against
+    other blocks (not sourced from the masked region) and the minimum distance block is used. As we can see, the results are passable but with smarter
+    priority functions and seam blending, the possibilities are certainly endless!
+    <center>
+    <table class="spacearound">
+     <tr>
+        <td>
+          <img src='images/image_quilting/rocks_fill_1.png' width=300><br>
+          <center>Rocks Fill Iteration 1, Number of Neighbors</center>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/rocks_fill_2.png' width=300><br>
+          <center>Rocks Fill Iteration 2, Number of Neighbors</center>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/rocks_fill_3.png' width=300><br>
+          <center>Rocks Fill Iteration 3, Number of Neighbors</center>
+        </td>
+      </tr>
+
+     <tr>
+        <td>
+          <img src='images/image_quilting/rocks.jpg' width=300><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/rocks_hole.jpg' width=300><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/rocks_fill.jpg' width=300><br>
+        </td>
+    </tr>
+
+      <tr>
+        <td>
+          <img src='images/image_quilting/toast.jpg' width=300><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/toast_hole.jpg' width=300><br>
+        </td>
+
+        <td>
+          <img src='images/image_quilting/toast_fill.jpg' width=300><br>
+        </td>
+      </tr>
+
+
+    </table>
+    </center>
+
+
+    <h2>What I Learned</h2>
+    For the first part of the project, I really got a chance to see an application of sparse matrices. Most rows of potentially tens of thousands of entries
+    had just one or two entries, which helped tremendously in terms of computation and memory usage. It's also amazing how subtle manipulation of low level
+    gradient features allow us to generate very interesting high-level changes! In image quilting, it was surprising how such a simple algorithm enabled us
+    to generate such great results. I also really enjoyed getting to replicate some familiar faces with some rather novel textures.
+</html>

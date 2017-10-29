@@ -1,0 +1,686 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+  </head>
+    <h1>CS 194-26: Image Manipulation and Computational Photography</h1>
+    <h2>Project Three - Fun with Frequencies!</h2>
+    <h2>Giulio Zhou</h2>
+
+    <center><h2>Part Zero - Unsharp Mask</h2></center>
+    For the first part of the project, I blurred images and subtracted them from the original image to create an unsharp mask. This was then used to sharpen images as follows. 
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/lena_0.jpg" width=300><br>
+                <center>Original Image</center>
+            </td>
+
+            <td>
+                <img src="images/lena_blurred.jpg" width=300><br>
+                <center>Blurred Image, sigma = 3</center>
+            </td>
+
+            <td>
+                <img src="images/lena_high_freq.jpg" width=300><br>
+                <center>Unsharp Mask</center>
+            </td>
+        </tr>
+    </table>
+    </center>
+    Here are the results of adding this mask to the original image using different weights.
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/lena_0.jpg" width=250><br>
+                <center>alpha = 0</center>
+            </td>
+
+            <td>
+                <img src="images/lena_0.2.jpg" width=250><br>
+                <center>alpha = 0.2</center>
+            </td>
+
+            <td>
+                <img src="images/lena_0.5.jpg" width=250><br>
+                <center>alpha = 0.5</center>
+            </td>
+
+            <td>
+                <img src="images/lena_1.jpg" width=250><br>
+                <center>alpha = 1</center>
+            </td>
+
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/lena_2.jpg" width=250><br>
+                <center>alpha = 2</center>
+            </td>
+
+            <td>
+                <img src="images/lena_5.jpg" width=250><br>
+                <center>alpha = 5</center>
+            </td>
+
+            <td>
+                <img src="images/lena_10.jpg" width=250><br>
+                <center>alpha = 10</center>
+            </td>
+
+            <td>
+                <img src="images/lena_50.jpg" width=250><br>
+                <center>alpha = 50</center>
+            </td>
+        </tr>
+    </table>
+    </center>
+    As we can see, adding back in the high frequencies help sharpen the image, but leads to loss of detail in the regions of lower frequency.
+    
+    <center><h2>Part One - Hybrid Images</h2></center>
+    In the next part of the project, I created hybrid images by combining a low-pass filtered version of one image with a high-pass filtered version of another. 
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/derek_aligned.jpg" width=200><br>
+                Derek
+            </td>
+
+            <td>
+                <img src="images/derek_blurred.jpg" width=200><br>
+                Blurred Derek
+            </td>
+        
+            <td>
+                <img src="images/derek_low_spectrum.png" width=200><br>
+                Derek's Spectrum
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/nutmeg_aligned.jpg" width=200><br>
+                Nutmeg
+            </td>
+
+            <td>
+                <img src="images/nutmeg_high.jpg" width=200><br>
+                High-pass Filtered Nutmeg
+            </td>
+
+            <td>
+                <img src="images/nutmeg_high_spectrum.png" width=200><br>
+                Nutmeg's Spectrum
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/derek_nutmeg.jpg" width=200><br>
+                Blended Image
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_spectrum.png" width=200><br>
+                Blended Image Spectrum
+            </td>
+        </tr>
+    </table>
+    </center>
+    Up close, we can see an image of Nutmeg but from afar, Derek's face becomes more prominent. From the Fourier transform, we notice that Derek's blurred image had the majority of its signals clustered around the center (with some artifacts due to the horizontal line in the image). Additionally, Nutmeg's high-pass filtered image contained many signals far from the center. Averaging the two, we get our final result.
+    <center>
+    <table class="spacearound">
+         <tr>
+            <td>
+                <img src="images/prius.jpg" width=300><br>
+                <center>Prius</center>
+            </td>
+
+            <td>
+                <img src="images/ferrari.jpg" width=300><br>
+                <center>Ferrari</center>
+            </td>
+
+            <td>
+                <img src="images/prius_ferrari.jpg" width=300><br>
+                <center>If you pretend hard enough, you just might find yourself driving a Ferrari</center>
+            </td>
+        </tr>
+    </table>
+    </center>
+
+
+    Generally speaking, it helped to align images of animals/people by their eyes and choose images with similar lighting conditions. Here's a failure case. The backgrounds of the two images were too different and Kanye's white jacket contrasted too much with Beethoven's attire. 
+    <center>
+    <table class="spacearound">
+         <tr>
+            <td>
+                <img src="images/kanye.jpg" width=300><br>
+                <center>Kanye</center>
+            </td>
+
+            <td>
+                <img src="images/Beethoven.jpg" width=300><br>
+                <center>Beethoven</center>
+            </td>
+
+            <td>
+                <img src="images/kanye_beethoven.jpg" width=300><br>
+                <center>Attempted Kanyethoven</center>
+            </td>
+        </tr>
+    </table>
+    </center>
+
+
+    <center><h2>Part Two - Gaussian and Laplacian Stacks</h2></center>
+    In Part Two, our goal was to develop Gaussian and Laplacian stacks to use for visualization of the high and low frequencies of images. A stack functions similarly to a pyramid, with the difference being that the image size does not change with each level. Instead, our images are convolved with filters of increasing size. As an example, I began by running this method on the Dali painting we covered in class.
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/gala_gauss_1.jpg" width=300><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/gala_gauss_2.jpg" width=300><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/gala_gauss_4.jpg" width=300><br>
+                <center>sigma = 4</center>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/gala_gauss_8.jpg" width=300><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/gala_gauss_16.jpg" width=300><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/gala_gauss_32.jpg" width=300><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+    </table>
+    </center>
+    Notice how the image of Abraham Lincoln becomes more and more visible as we removed the lower frequencies. Conversely, the image of Gala becomes more prominent as we remove the higher frequencies.
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/gala_laplace_1.jpg" width=300><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/gala_laplace_2.jpg" width=300><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/gala_laplace_4.jpg" width=300><br>
+                <center>sigma = 4</center>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/gala_laplace_8.jpg" width=300><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/gala_laplace_16.jpg" width=300><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/gala_laplace_32.jpg" width=300><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+    </table>
+    </center>
+    Let's now try applying our Gaussian and Laplacian stacks to our previously generated hybrid images.
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/derek_nutmeg_gauss_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_gauss_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_gauss_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_gauss_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_gauss_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_gauss_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/derek_nutmeg_laplace_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_laplace_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_laplace_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_laplace_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_laplace_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/derek_nutmeg_laplace_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+    </table>
+    </center>
+
+    <center><h2>Part Three - Multiresolution Blending</h2></center>
+    In Part Three, I got the chance to use my Gaussian and Laplacian pyramids to perform multiresolution blending. I first tried out the orange and apple example that we were provided and got the following results. 
+    <center>
+      <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/apple.jpeg" width=300><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/orange.jpeg" width=300><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/orapple.jpg" width=300><br>
+                <center>sigma = 32</center>
+            </td>
+       </table>
+    </center>
+
+    As we can see, the two images blend together fairly well, likely because their backgrounds are identical. Shown below are the Laplacian stacks of the apple and orange, and the Gaussian stack of the mask used to blend them. 
+
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/apple_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/apple_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/apple_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/apple_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/apple_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/apple_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/orange_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/orange_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/orange_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/orange_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/orange_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/orange_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/mask_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/mask_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/mask_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/mask_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/mask_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/mask_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+    </table>
+    </center>
+
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/day_night.jpg" width=700>
+        </td>
+
+        <td>
+          <img src="images/day_night_combined.jpg" width=350>
+        </td>
+      </tr>
+    </table>
+    </center>
+
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/day_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/day_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/day_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/day_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/day_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/day_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/night_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/night_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/night_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/night_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/night_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/night_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/day_night_mask_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/day_night_mask_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/day_night_mask_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/day_night_mask_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/day_night_mask_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/day_night_mask_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+    </table>
+    </center>
+
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/berkeley.jpg" width=300>
+        </td>
+
+        <td>
+          <img src="images/aurora.jpg" width=300>
+        </td>
+
+        <td>
+          <img src="images/aurora_berkeley.jpg" width=300>
+        </td>
+      </tr>
+    </table>
+    </center>
+
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/berkeley_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/berkeley_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/berkeley_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/berkeley_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/berkeley_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/berkeley_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/aurora_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/aurora_berkeley_mask_1.jpg" width=150><br>
+                <center>sigma = 1</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_berkeley_mask_2.jpg" width=150><br>
+                <center>sigma = 2</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_berkeley_mask_4.jpg" width=150><br>
+                <center>sigma = 4</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_berkeley_mask_8.jpg" width=150><br>
+                <center>sigma = 8</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_berkeley_mask_16.jpg" width=150><br>
+                <center>sigma = 16</center>
+            </td>
+
+            <td>
+                <img src="images/aurora_berkeley_mask_32.jpg" width=150><br>
+                <center>sigma = 32</center>
+            </td>
+        </tr>
+    </table>
+    </center>  
+    While my image blends all turned out decently well, I noticed they had a few things in common. All of my images had a similar sense of perspective as well as similar backgrounds. If I were to start blending images with high contrast backgrounds or imperfect subject alignment, I would expect to start seeing some bizarre results.
+    <center><h2>Bells and Whistles</h2></center>
+    I did all of my parts in color from the beginning since I felt it looked much better. 
+    <center><h2>What I Learned</h2></center>
+    This homework really helped me understand the idea of band-pass filters on 2-dimensional images. I had a lot of fun playing around with effects and always find the it fascinating how much signal processing influences our daily lives.
+
+</html>

@@ -1,0 +1,395 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+  </head>
+    <h1>CS 194-26: Image Manipulation and Computational Photography</h1>
+    <h2>Project Four - Seam Carving</h2>
+    <h2>Giulio Zhou</h2>
+    <center><h2>Seam Carving Background</h2></center>
+    In this project, we implemented seam carving, an algorithm for content-aware rescaling of images. When resizing images, we can naively use methods such as cropping or simple scaling, but these techniques will distort the images in undesired ways or leave out important information. Seam Carving works by applying an energy function on the image to determine which sections are "important". As my base energy function, I use a 2D gradient operator, working off the principle that human eyes are quite sensitive to edges and that interesting subjects tend to have some amount of sharp edges. Once applied, we use a simple dynamic programming algorithm to find the best horizontal or vertical paths through the image (as illustrated below) and remove the minimum cost seam.<br>
+    <center>
+    <table class="spacearound" style="border-spacing: 30px 0">
+      <tr>
+        <td>
+            <img src="images/house_gradient.jpg"><br>
+            Gradient function applied to the house
+        </td> 
+
+        <td>
+            <img src="images/dynamic.png"><br>
+            Seam Carving applies dynamic programming
+        </td> 
+      </tr>
+
+      <tr>
+        <td>
+          <video controls loop>
+            <source src="images/house.mp4" type="video/mp4">
+          </video>
+        </td>
+
+        <td>
+          <video controls loop>
+            <source src="images/house_vert.mp4" type="video/mp4">
+          </video>
+        </td>
+      </tr>
+    </table>
+    </center>
+  
+    <center><h2>Basic Seam Carving Results</h2></center>
+    Here are the results I obtained using the basic seam carving algorithm. <br>
+    <table class="spacearound" style="border-spacing: 30px 0">
+        <tr>
+            <td>
+                <img src="images/house.jpg" width=400><br>
+                House in the Woods 
+            </td>
+
+            <td>
+                <img src="images/house_horz_20.jpg" width=320><br>
+                Horizontal Seam Carved 20%
+            </td>
+        
+            <td>
+                <img src="images/house_vert_20.jpg" width=400><br>
+                Vertical Seam Carved 20%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/dubai.jpg" width=400><br>
+                Dubai 
+            </td>
+
+            <td>
+                <img src="images/dubai_horz_20.jpg" width=320><br>
+                Horizontal Seam Carved 20%
+            </td>
+        
+            <td>
+                <img src="images/dubai_vert_20.jpg" width=400><br>
+                Vertical Seam Carved 20%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/halfdome.jpg" width=400><br>
+                Half Dome
+            </td>
+
+            <td>
+                <img src="images/halfdome_horz_20.jpg" width=320><br>
+                Horizontal Seam Carved 20%
+            </td>
+        
+            <td>
+                <img src="images/halfdome_vert_20.jpg" width=400><br>
+                Vertical Seam Carved 20%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/broadway.jpg" width=400><br>
+                Broadway Castle 
+            </td>
+
+            <td>
+                <img src="images/broadway_horz_20.jpg" width=320><br>
+                Horizontal Seam Carved 20%
+            </td>
+        
+            <td>
+                <img src="images/broadway_vert_20.jpg" width=400><br>
+                Vertial Seam Carved 20%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/berkeley.jpg" width=400><br>
+                Berkeley Campus 
+            </td>
+
+            <td>
+                <img src="images/berkeley_horz_20.jpg" width=320><br>
+                Horizontal Seam Carved 20%
+            </td>
+        
+            <td>
+                <img src="images/berkeley_vert_20.jpg" width=400><br>
+                Vertical Seam Carved 20%
+            </td>
+        </tr>
+    </table>
+    <center><h2>Some Failure Cases</h2></center>
+    <table class="spacearound" style="border-spacing: 30px 0">
+        <tr>
+            <td>
+                <img src="images/couple-millenials.jpg" width=400><br>
+                Couple in the Fog 
+            </td>
+
+            <td>
+                <img src="images/couple_horz_20.jpg" width=320><br>
+                Horizontal Seam Carved 20%
+            </td>
+        
+            <td>
+                <img src="images/couple_vert_20.jpg" width=400><br>
+                Vertical Seam Carved 20%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+            </td>
+
+            <td>
+                <img src="images/couple_horz_30_insert.jpg" width=320><br>
+                Horizontal Seam Insertion 20%
+            </td>
+        
+            <td>
+                <img src="images/couple_vert_30_insert.jpg" width=400><br>
+                Vertical Seam Insertion 20%
+            </td>
+        </tr>
+    </table>
+    Notice that seam carving and insertion worked pretty well for vertical resizing but failed catastrophically for horizontal resizing. If we look at the energy map, we quickly notice that the ground to the left and right have some fairly high energy contents, leading algorithm to delete seams from the smoother contours of our subjects (with some extraordinary weight gain and weight loss effects). For additional slight defects, also look above to the Berkeley horizontal seam carving result. Notice that quite a lot of details were removed and the edges on the buildings are somewhat uneven.
+
+    <table class="spacearound" style="border-spacing: 30px 0">
+        <tr>
+            <td>
+                <img src="images/monalisa.jpg" width=300><br>
+                Mona Lisa
+            </td>
+
+            <td>
+                <img src="images/horz_mona.jpg" width=235><br>
+                Horizontal Seam Carved 20%
+            </td>
+        
+            <td>
+                <img src="images/vert_mona.jpg" width=300><br>
+                Vertical Seam Carved 20%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/mona_gradient.jpg" width=300><br>
+                Gradient of Mona Lisa
+            </td>
+        
+            <td>
+                <img src="images/horz_mona_scaled.jpg" width=235><br>
+                Horizontal Scaled Mona
+            </td>
+
+            <td>
+                <img src="images/vert_mona_scaled.jpg" width=300><br>
+                Vertical Scaled Mona
+            </td>
+        </tr>
+    </table>
+
+    Here, we see a particularly interesting failure case. Our image (Mona Lisa) is shown to have considerably high entropy due to the rendering of the painting and as a result, the seams (aside from some bias to the smoother areas) appear of have been inserted completely randomly! As a result, the seam carved and scaled images look fairly alike. 
+
+    <center><h2>Bells and Whistles</h2></center>
+    <h3>Seam Insertion</h3>
+    In addition to Seam Carving, I also implemented seam insertion. We start by finding the k best seams and proceed via normal seam carving. However, we instead examine each seam in order and interpolate with the neighboring pixel. The results are shown below.
+    <table class="spacearound" style="border-spacing: 30px 0">
+        <tr>
+            <td>
+                <img src="images/house.jpg" width=350><br>
+                House in the Woods 
+            </td>
+
+            <td>
+                <img src="images/house_horz_30_insert.jpg" width=455><br>
+                Horizontal Seam Insertion 30%
+            </td>
+        
+            <td>
+                <img src="images/house_vert_30_insert.jpg" width=350><br>
+                Vertical Seam Insertion 30%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/dubai.jpg" width=350><br>
+                Dubai 
+            </td>
+
+            <td>
+                <img src="images/dubai_horz_30_insert.jpg" width=455><br>
+                Horizontal Seam Insertion 30%
+            </td>
+        
+            <td>
+                <img src="images/dubai_vert_30_insert.jpg" width=350><br>
+                Vertical Seam Insertion 30%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/halfdome.jpg" width=350><br>
+                Half Dome
+            </td>
+
+            <td>
+                <img src="images/halfdome_horz_30_insert.jpg" width=455><br>
+                Horizontal Seam Insertion 30%
+            </td>
+        
+            <td>
+                <img src="images/halfdome_vert_30_insert.jpg" width=350><br>
+                Vertical Seam Insertion 30%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/broadway.jpg" width=350><br>
+                Broadway Castle 
+            </td>
+
+            <td>
+                <img src="images/broadway_horz_30_insert.jpg" width=455><br>
+                Horizontal Seam Insertion 30%
+            </td>
+        
+            <td>
+                <img src="images/broadway_vert_30_insert.jpg" width=350><br>
+                Vertical Seam Insertion 30%
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="images/berkeley.jpg" width=350><br>
+                Berkeley Campus 
+            </td>
+
+            <td>
+                <img src="images/berkeley_horz_30_insert.jpg" width=455><br>
+                Horizontal Seam Insertion 30%
+            </td>
+        
+            <td>
+                <img src="images/berkeley_vert_30_insert.jpg" width=350><br>
+                Vertical Seam Insertion 30%
+            </td>
+        </tr>
+    </table>
+    <h3>Object Removal Using Seam Carving/Insertion</h3>
+    Another awesome application of seam carving and insertion is object removal. This works by using a mask to alter the energy values at regions we want to remove and preserve (lowering and raising them respectively), and then running our normal seam carving algorithm. Once the undesired parts of the image have been removed, we can resize the image back to its original size using seam insertion. <br>
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/couple-millenials.jpg" width=250><br>
+          Couple Standing Together 
+        </td>
+
+        <td>
+          <img src="images/couple-millenials-removal-mask.jpg" width=250><br>
+          Mask to remove woman
+        </td>
+
+        <td>
+          <img src="images/couple_keep_mask.jpg" width=250><br>
+          Mask to keep man
+        </td>
+
+        <td>
+          <img src="images/couple_removed.jpg" width=200><br>
+          Stoic Man By Himself
+        </td>
+      </tr>
+    </table>
+    </center>
+    At first, I was curious if I could perform this deletion without the keep mask. After trying it out, I got some pretty strange results (similar to the weight loss seen in horizontal seam deletion failure) since this image has some pretty high energy elements on both sides of the couple. Also, note the slight artifact next to the man's hand, which occurred due to human error in drawing the mask.
+
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/berkeley.jpg" width=250><br>
+          Berkeley Campus 
+        </td>
+
+        <td>
+          <img src="images/berkeley-mask.jpg" width=250><br>
+          Mask to remove tourists
+        </td>
+
+        <td>
+          <img src="images/berkeley_removed.jpg" width=226><br>
+          Campus Without Pesky Tourists
+        </td>
+
+        <td>
+          <img src="images/berkeley_refitted.jpg" width=250><br>
+          Resized using seam insertion
+        </td>
+      </tr>
+    </table>
+    </center>
+    See it in action! <br>
+    <video controls loop>
+      <source src="images/berkeley_remove.mp4" type="video/mp4">
+    </video>
+
+    <h3>Diagonal Seam Carving</h3>
+    In addition to horizontal and vertical seam carving, I also implemented diagonal seam carving, which finds the best sequence of horizontal and vertical seams to resize images. <br>
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/house.jpg" width=400><br>
+                House in the Woods 
+            </td>
+
+            <td>
+                <img src="images/other_house.jpg" width=320><br>
+                Horizontal, then Vertically Resized
+            </td>
+        
+            <td>
+                <img src="images/diagonal_house.jpg" width=320><br>
+                Diagonal Resizing
+            </td>
+        </tr>
+    </table>
+    </center>
+    Overall, there doesn't appear to be too much of a difference between the two, but the diagonal resizing appears to be slightly better about minimizing distortion of edges.
+    <h3>Alternate Energy Functions</h3>
+    I tried using some alternate energy functions such as entropy, but they were generally much slower than my gradient function (and thus I didn't get a chance to run seam carving on other images). Based on the results below, it appears that the entropy function was able to identify the foreground much better than the gradient function (which generally only focused on edges). Perhaps with some optimizations, the entropy function could be very useful for seam carving.
+    <center>
+    <table class="spacearound">
+        <tr>
+            <td>
+                <img src="images/berkeley_grad.jpg" width=500><br>
+                Berkeley Campus Gradient Function
+            </td>
+
+            <td>
+                <img src="images/berkeley_entropy.jpg" width=500><br>
+                Berkeley Campus Entropy Function
+            </td>
+        </tr>
+    </table>
+    </center>
+        
+
+    <center><h2>What I Learned</h2></center>
+    Before this project, I had only briefly heard about content-aware image resizing. It's really amazing to see how powerful and straightforward these algorithms actually are, and the results are absolutely stunning! Even with their limitations, content-aware image resizing algorithms such as seam carving are amazing tools to have around. 
+
+</html>

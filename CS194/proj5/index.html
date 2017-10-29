@@ -1,0 +1,237 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+  </head>
+    <h1>CS 194-26: Image Manipulation and Computational Photography</h1>
+    <h2>Project Five - Seam Carving</h2>
+    <h2>Giulio Zhou</h2>
+    <center><h2>Part One: Face Morphs</h2></center>
+    <p>Let's start off by briefly describing the mechanisms we will employ to perform the face morphs. A naive method to morph faces might just involve aligning two images by some pre-selected critical points and averaging them. This, however, may result in a ghosting effect where some features of the target image suddenly start to appear, resulting in some very poor transitions. An alternative approach is just to morph the features of the two images directly! To perform our face morphs, we start by selecting some feature points on both faces and computing an optimal Delaunay triangulation. Here's an example using our friends George and Bill.</p>
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/george.jpg" width=250><br>
+          George
+        </td>
+        <td>
+          <img src="images/bill.jpg" width=250><br>
+          Bill
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src="images/george_bill_triang.jpg" width=500><br>
+          George Triangulation
+        </td>
+        <td>
+          <img src="images/bill_triang.jpg" width=500><br>
+          Bill Triangulation
+        </td>
+      </tr>
+    </table>
+    </center>
+    <p>After selecting the points (ensuring the select the corresponding feature points on both faces), we compute a Delaunay triangulation to minimize the "skinniness" of the triangles. Then, an average set of coordinates are computed by averaging each pair of corresponding points on both faces. Finally, we perform a linear transformation on each triangle from the starting and target images to the mean coordinates.</p>
+
+    <p>For each triangle, we must compute a unique transformation matrix. This is done by solving the equation for the transformation matrix M. </p>
+
+    <p>Once this is done, each pixel from the starting and target images are mapped to a new set of coordinates using this transformation matrix M. Notice the gaps in the image. These occur due to rounding of the transformed coordinates (which are usually non-integer values). To compensate, I performed a small amount of splatting and resampled from a Gaussian blurred image to fill in the remaining holes, which were few. And that's it! This was surprisingly straightforward and it produced some very excellent results. </p>
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/george_bill_mean.jpg" width=240><br>
+          George/Bill mean face
+        </td>
+        <td>
+          <img src="images/george_bill_bad.gif"><br>
+          George to Bill without interpolation
+        </td>
+        <td>
+          <img src="images/george_bill_good.gif"><br>
+          George to Bill with interpolation
+        </td>
+      </tr>
+    </table>
+    </center>
+
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/giulio_isaac.gif" width=240><br>
+          Warping myself into my friend Isaac
+        </td>
+        <td>
+          <img src="images/giulio_jessica.gif"><br>
+          I'm now a Korean model 
+        </td>
+      </tr>
+    </table>
+    </center>
+
+    <center><h2>Part Two: Finding the Mean Face of a Population</h2></center>
+    <p>With this amazing technique, we can now turn our attention to another interesting problem: finding the mean face of a population. Here, I used the Danes dataset made available by the Technical University of Denmark. All of the faces in the dataset were already conveniently labeled, so all that I had to do was use some of the similar techniques from our standard face morphing procedure. Using the coordinate data that they provided me, I started by averaging them together. Using the average coordinates as a reference point, I then transformed each face to fit these coordinates and averaged the resulting pixels together. The result is shown as follows.</p>
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/dane_mean.jpg" width=300><br>
+          Danish Mean
+        </td>
+
+        <td>
+          <img src="images/dane1_mean.gif" width=300><br>
+          Danish Face 1 to Danish Mean
+        </td>
+
+        <td>
+          <img src="images/dane2_mean.gif" width=300><br>
+          Danish Face 2 to Danish Mean
+        </td>
+      </tr>
+    </table>
+    </center>
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/dane_giulio.gif"><br>
+          Warping the Danish average to my face
+        </td>
+        <td>
+          <img src="images/giulio_dane.gif"><br>
+          Making my face more "Danish"
+        </td>
+        <td>
+          <img src="images/giulio_dane_inv.gif"><br>
+          Making my face less "Danish"
+        </td>
+      </tr>
+    </table>
+    </center>
+    <p>This actually turned out quite well! Afterwards, I had some fun morphing some individual faces to the average, and even played around with my own face.</p>
+
+
+    <h3>Bells and Whistles: Changing My Ethnicity</h3>
+    <img src="images/many_faces.jpg" width=100%>
+    <center>
+    <table class="spacearound">
+      <tr>
+        <td>
+          <img src="images/korean_avg.jpg" width=150><br>
+          Korean Average
+        </td>
+
+        <td>
+          <img src="images/chinese_avg.jpg" width=150><br>
+          Chinese Average
+        </td>
+
+        <td>
+          <img src="images/american_avg.jpg" width=150><br>
+          White American Average
+        </td>
+
+        <td>
+          <img src="images/african_am_avg.jpg" width=150><br>
+          African American Average
+        </td>
+
+        <td>
+          <img src="images/french_avg.jpg" width=150><br>
+          French Average
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src="images/more_korean.jpg" width=150><br>
+          More Korean
+        </td>
+
+        <td>
+          <img src="images/more_chinese.jpg" width=150><br>
+          More Chinese
+        </td>
+
+        <td>
+          <img src="images/more_american.jpg" width=150><br>
+          More White American
+        </td>
+
+        <td>
+          <img src="images/more_african_am.jpg" width=150><br>
+          More African American
+        </td>
+
+        <td>
+          <img src="images/more_french.jpg" width=150><br>
+          More French
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src="images/giulio_mask.jpg" width=150><br>
+          Me
+        </td>
+
+        <td>
+          <img src="images/giulio_mask.jpg" width=150><br>
+          Me
+        </td>
+
+        <td>
+          <img src="images/giulio_mask.jpg" width=150><br>
+          Me
+        </td>
+
+        <td>
+          <img src="images/giulio_mask.jpg" width=150><br>
+          Me
+        </td>
+
+        <td>
+          <img src="images/giulio_mask.jpg" width=150><br>
+          Me
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <img src="images/less_korean.jpg" width=150><br>
+          Less Korean
+        </td>
+
+        <td>
+          <img src="images/less_chinese.jpg" width=150><br>
+          Less Chinese
+        </td>
+
+        <td>
+          <img src="images/less_american.jpg" width=150><br>
+          Less White American
+        </td>
+
+        <td>
+          <img src="images/less_african_am.jpg" width=150><br>
+          Less African American
+        </td>
+
+        <td>
+          <img src="images/less_french.jpg" width=150><br>
+          Less French
+        </td>
+      </tr>
+
+    </table>
+    </center>
+
+    <h3>Bells and Whistles: Harry Potter Music Video</h3>
+    <iframe width="420" height="315" src="https://www.youtube.com/embed/E7aYzMDeF08" frameborder="0" allowfullscreen></iframe>
+    <h3>What I Learned</h3>
+    In the past, I remember seeing these images around the web and thinking of how difficult these must've been to make. I was so surprised how such a straightforward technique allowed us to create such stunning images! This will probably keep me thoroughly entertained in the near future.
+
+</html>
