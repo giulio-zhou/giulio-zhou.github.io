@@ -1574,6 +1574,23 @@ p {
   }
 }
 
+.blog {
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.4;
+}
+@media (min-width: 768px) {
+  .blog {
+    font-size: 18.2px;
+  }
+}
+
+.blog-spacing {
+  padding-left: 102px;
+  padding-right: 102px;
+}
+
 small,
 .small {
   font-size: 85%;

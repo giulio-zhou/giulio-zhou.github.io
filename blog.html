@@ -1,0 +1,13 @@
+---
+layout: default 
+title:  Blog
+type:   blog
+---
+
+<p class="lead">
+{% for post in site.posts %}
+ {% if post.visible %}
+   <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+ {% endif %}
+{% endfor %}
+</p>
