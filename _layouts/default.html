@@ -4,7 +4,11 @@
    <meta charset="utf-8">
    <title>{{ page.title }} - {{ site.title }}</title>
 
-   <link rel="stylesheet" type="text/css" href="{{ site.path }}/css/style.css" >
+   {% if page.css_homedir %}
+     <link rel="stylesheet" type="text/css" href="{{ page.css_homedir }}/css/style.css" >
+   {% else %}
+     <link rel="stylesheet" type="text/css" href="{{ site.path }}/css/style.css" >
+   {% endif %}
 
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
    <script src="{{ site.path }}/js/bootstrap.min.js"></script>
@@ -25,12 +29,12 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="projects.html">Projects</a></li>
-            <li><a href="resume.pdf">Resume</a></li>
-            <li><a href="cv.pdf">CV</a></li>
-            <li><a href="contact.html">Contact</a></li>
+            <li {% if page.type == "home"     %}class="active"{% endif %}><a href="/index.html">Home</a></li>
+            <li {% if page.type == "about"    %}class="active"{% endif %}><a href="/about.html">About</a></li>
+            <li {% if page.type == "projects" %}class="active"{% endif %}><a href="/projects.html">Projects</a></li>
+            <li><a href="/resume.pdf">Resume</a></li>
+            <li><a href="/cv.pdf">CV</a></li>
+            <li {% if page.type == "contact"  %}class="active"{% endif %}><a href="/contact.html">Contact</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
