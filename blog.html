@@ -7,7 +7,7 @@ type:   blog
 <p class="lead">
 {% for post in site.posts %}
  {% if post.visible %}
-   <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+   <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a><br>
  {% endif %}
 {% endfor %}
 </p>
