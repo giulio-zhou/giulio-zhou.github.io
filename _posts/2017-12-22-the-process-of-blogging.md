@@ -2,7 +2,7 @@
 layout:      post
 title:       "Thoughts so far on blogging"
 date:        2017-12-22 12:00:00 
-visible:     false
+visible:     true
 css_homedir: ../../..
 ---
 
