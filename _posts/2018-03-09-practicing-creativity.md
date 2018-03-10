@@ -1,6 +1,6 @@
 ---
 layout:      post
-title:       "How Can Creativity Be Practiced?"
+title:       "How can creativity be practiced?"
 date:        2018-03-09 23:00:00 
 visible:     true
 css_homedir: ../../..
